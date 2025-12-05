@@ -1,4 +1,4 @@
-"use-client";
+"use client";
 import { Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -12,6 +12,8 @@ interface DeleteFeedButtonProps {
 
 export function DeleteFeedButton({ feedId, feedTitle }: DeleteFeedButtonProps) {
   const router = useRouter();
+
+  const handleDelete = async () => {};
 
   return (
     <Button>

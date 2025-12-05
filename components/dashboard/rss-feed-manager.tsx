@@ -10,6 +10,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { DeleteFeedButton } from "./delete-feed-button";
+import { AddFeedDialog } from "./add-feed-dialog";
 // import { AddFeedDialog } from "./add-feed-dialog";
 // import { DeleteFeedButton } from "./delete-feed-button";
 
@@ -31,55 +33,88 @@ export async function RssFeedManager() {
 
   const user = await upsertUserFromClerk(userId!);
   const feeds = (await getRssFeedsByUserId(user.id)) as RssFeed[];
+  console.log(feeds);
 
   return (
-    <Card>
+    <Card className="transition-all hover:shadow-lg overflow-hidden">
       <CardHeader>
-        <div>
-          <div>
-            <CardTitle>RSS Feeds</CardTitle>
-            <CardDescription>Manage your RSS feed sources</CardDescription>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="min-w-0 flex-1">
+            <CardTitle className="text-2xl">RSS Feeds</CardTitle>
+            <CardDescription className="text-base">
+              Manage your RSS feed sources
+            </CardDescription>
           </div>
-          {/* <AddFeedDialog/> */}
+          <AddFeedDialog
+            currentFeedCount={feeds.length}
+            feedLimit={feedLimit}
+            isPro={isPro}
+          />
         </div>
       </CardHeader>
       <CardContent>
         {feeds.length === 0 ? (
-          <div>
-            <div>No RSS feeds added yet</div>
-            {/* <AddFeedDialog/> */}
+          <div className="text-center py-12">
+            <div className="text-muted-foreground mb-4">
+              No RSS feeds added yet
+            </div>
+            <AddFeedDialog
+              currentFeedCount={feeds.length}
+              feedLimit={feedLimit}
+              isPro={isPro}
+              trigger={
+                <Button className="bg-linear-to-r from-cyan-500 to-teal-600 hover:from-cyan-600 hover:to-teal-700 text-white">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Your First Feed
+                </Button>
+              }
+            />
           </div>
         ) : (
-          <div>
+          <div className="grid gap-4">
             {feeds.map((feed) => (
-              <div key={feed.id}>
-                <div>
-                  <div>
-                    <div>
-                      <h3>{feed.title || "Untitled Feed"}</h3>
+              <div
+                key={feed.id}
+                className="border rounded-lg p-4 hover:bg-accent/50 hover:shadow-md transition-all overflow-hidden"
+              >
+                <div className="flex items-start justify-between gap-2 sm:gap-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="font-semibold truncate">
+                        {feed.title || "Untitled Feed"}
+                      </h3>
                     </div>
-                    <a href={feed.url}>
-                      <span>{feed.url}</span>
-                      <ExternalLink />
+                    <a
+                      href={feed.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-muted-foreground hover:text-cyan-600 dark:hover:text-cyan-400 inline-flex items-center gap-1 mb-2 transition-colors max-w-full"
+                    >
+                      <span className="truncate break-all">{feed.url}</span>
+                      <ExternalLink className="h-3 w-3 shrink-0" />
                     </a>
-                    {feed.description && <p>{feed.description}</p>}
-                    <div>
-                      <span>
+                    {feed.description && (
+                      <p className="text-sm text-muted-foreground line-clamp-2 mb-2 wrap-break-word">
+                        {feed.description}
+                      </p>
+                    )}
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                      <span className="whitespace-nowrap">
                         {feed._count?.articles ?? 0} article
                         {feed._count?.articles !== 1 ? "s" : ""}
                       </span>
                       {feed.lastFetched && (
-                        <span>
+                        <span className="whitespace-nowrap">
                           Last fetched:{" "}
                           {new Date(feed.lastFetched).toLocaleDateString()}
                         </span>
                       )}
                     </div>
                   </div>
-                  {/* <DeleteFeedButton
+                  <DeleteFeedButton
                     feedId={feed.id}
                     feedTitle={feed.title || feed.url}
-                  /> */}
+                  />
                 </div>
               </div>
             ))}
