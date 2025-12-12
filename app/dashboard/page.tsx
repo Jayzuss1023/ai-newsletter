@@ -1,3 +1,4 @@
+import { NewsletterGenerator } from "@/components/dashboard/newsletter-generator";
 import { PageHeader } from "@/components/dashboard/page.header";
 import { RssFeedManager } from "@/components/dashboard/rss-feed-manager";
 import { Sparkles } from "lucide-react";
@@ -16,6 +17,11 @@ async function Dashboard() {
         <div>
           <div>
             <RssFeedManager />
+          </div>
+
+          {/* Right Column */}
+          <div>
+            <NewsletterGenerator />
           </div>
         </div>
       </div>

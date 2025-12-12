@@ -54,3 +54,12 @@ export interface ArticleData {
   categories: string[];
   imageUrl?: string;
 }
+
+/**
+ * Parameters for feed preparation
+ */
+export interface PrepareFeedsParams {
+  feedIds: string[];
+  startDate: Date;
+  endDate: Date;
+}

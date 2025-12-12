@@ -7,10 +7,13 @@ import {
 } from "@/lib/database/prisma-helpers";
 import { prisma } from "@/lib/prisma";
 
-/**
- * Fetched all RSS feeds for a specific user with article counts
- */
+// ============================================
+// RSS FEED ACTIONS
+// ============================================
 
+/**
+ * Fetches all RSS feeds for a specific user with article counts
+ */
 export async function getRssFeedsByUserId(userId: string) {
   return wrapDatabaseOperation(async () => {
     return await prisma.rssFeed.findMany({
@@ -37,11 +40,12 @@ export async function updateFeedLastFetched(feedId: string) {
   }, "update feed last fetched");
 }
 
-//**
-// Permanently deletes an RSS feed and cleaned up articles not referenced by other feeds */
+/**
+ * Permanently deletes an RSS feed and cleans up articles not referenced by other feeds
+ */
 export async function deleteRssFeed(feedId: string) {
   return wrapDatabaseOperation(async () => {
-    // MonogoDB-specific: Remove feedId from sourceFeedIds arrays
+    // MongoDB-specific: Remove feedId from sourceFeedIds arrays
     await prisma.$runCommandRaw({
       update: "RssArticle",
       updates: [
@@ -53,7 +57,7 @@ export async function deleteRssFeed(feedId: string) {
       ],
     });
 
-    // Delete articles that hve no more feed references (empty sourceFeedIds)
+    // Delete articles that have no more feed references (empty sourceFeedIds)
     await prisma.rssArticle.deleteMany({
       where: {
         sourceFeedIds: {
@@ -66,5 +70,7 @@ export async function deleteRssFeed(feedId: string) {
     await prisma.rssFeed.delete({
       where: { id: feedId },
     });
+
+    return { success: true };
   }, "delete RSS feed");
 }
