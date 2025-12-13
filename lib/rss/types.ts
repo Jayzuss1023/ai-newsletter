@@ -2,8 +2,6 @@
 // RSS-SPECIFIC TYPE DEFINITIONS
 // ============================================
 
-import { StringToBoolean } from "class-variance-authority/dist/types";
-
 /**
  * Data required to create an RSS article.
  */
