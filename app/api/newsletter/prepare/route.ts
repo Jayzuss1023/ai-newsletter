@@ -22,14 +22,14 @@ export async function POST(req: NextRequest) {
     if (!feedIds || !Array.isArray(feedIds) || feedIds.length === 0) {
       return Response.json(
         { error: "FeedIds is required and must be a non-empty array" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (!startDate || !endDate) {
       return Response.json(
         { error: "startDate and endDate are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
       feedIds,
       new Date(startDate),
       new Date(endDate),
-      100 // Same limit as generation
+      100, // Same limit as generation
     );
 
     return Response.json({
@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
 
     return Response.json(
       { error: `Failed to prepare newsletter: ${errorMessage}` },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

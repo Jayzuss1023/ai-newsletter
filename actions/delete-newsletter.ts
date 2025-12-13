@@ -35,7 +35,7 @@ export async function deleteNewsletterAction(newsletterId: string) {
   } catch (error) {
     console.error("Failed to delete newsletter:", error);
     throw new Error(
-      error instanceof Error ? error.message : "Failed to delete newsletter"
+      error instanceof Error ? error.message : "Failed to delete newsletter",
     );
   }
 }

@@ -106,7 +106,7 @@ export function NewsletterGenerationPage() {
             toast.info(
               `refreshing ${data.feedsToRefresh} feed${
                 data.feedsToRefresh > 1 ? "s" : ""
-              }...`
+              }...`,
             );
           }
 
@@ -115,7 +115,7 @@ export function NewsletterGenerationPage() {
             toast.info(
               `Analyzing ${data.articlesFound} article${
                 data.articlesFound > 1 ? "2" : ""
-              } from your feeds...`
+              } from your feeds...`,
             );
             setArticlesCount(data.articlesFound);
           }

@@ -3,6 +3,7 @@
 import { Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 import * as React from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,7 +17,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { type DateRange, DateRangePicker } from "./date-range-picker";
-import { useState, useEffect } from "react";
 
 interface RssFeed {
   id: string;
@@ -47,7 +47,7 @@ export function NewsletterForm({ feeds }: NewsletterFormProps) {
     setSelectedFeeds((prev) =>
       prev.includes(feedId)
         ? prev.filter((id) => id !== feedId)
-        : [...prev, feedId]
+        : [...prev, feedId],
     );
   };
 

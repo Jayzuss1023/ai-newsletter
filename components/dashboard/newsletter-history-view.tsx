@@ -3,6 +3,7 @@
 import { ArrowLeft, Calendar, Clock, FileText, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import * as React from "react";
+import { useTransition } from "react";
 import { toast } from "sonner";
 import { deleteNewsletterAction } from "@/actions/delete-newsletter";
 import { Button } from "@/components/ui/button";
@@ -14,7 +15,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { NewsletterDisplay } from "./newsletter-display";
-import { useTransition } from "react";
+
 interface Newsletter {
   id: string;
   userId: string;
@@ -133,7 +134,7 @@ export function NewsletterHistoryView({
                         month: "short",
                         day: "numeric",
                         year: "numeric",
-                      }
+                      },
                     )}{" "}
                     -{" "}
                     {new Date(newsletter.endDate).toLocaleDateString("en-US", {

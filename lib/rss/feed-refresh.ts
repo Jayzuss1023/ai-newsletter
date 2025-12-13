@@ -73,7 +73,7 @@ export async function getFeedsToRefresh(feedIds: string[]): Promise<string[]> {
   const recentlyFetchedUrls = new Set(
     recentFetches
       .filter((fetch) => fetch._max.lastFetched !== null)
-      .map((fetch) => fetch.url)
+      .map((fetch) => fetch.url),
   );
 
   // Feeds need refresh if their URL is NOT in the recently fetched set
@@ -102,28 +102,28 @@ export async function prepareFeedsAndArticles(params: PrepareFeedsParams) {
 
   if (feedsToRefresh.length > 0) {
     console.log(
-      `Refreshing ${feedsToRefresh.length} stale feeds out (out of ${params.feedIds.length} total)...`
+      `Refreshing ${feedsToRefresh.length} stale feeds out (out of ${params.feedIds.length} total)...`,
     );
     // Refresh all stale feeds in parallel for better performance
     // Using Promise.allSettled so one failure doesn't stop others
     const refreshResults = await Promise.allSettled(
-      feedsToRefresh.map((feedId) => fetchAndStoreFeed(feedId))
+      feedsToRefresh.map((feedId) => fetchAndStoreFeed(feedId)),
     );
 
     // Log resuts for monitoring
     const successful = refreshResults.filter(
-      (r) => r.status === "fulfilled"
+      (r) => r.status === "fulfilled",
     ).length;
 
     const failed = refreshResults.filter((r) => r.status === "rejected").length;
 
     console.log(
-      `Feed refresh complete: ${successful} successful, ${failed} failed`
+      `Feed refresh complete: ${successful} successful, ${failed} failed`,
     );
   } else {
     console.log(
       `
-      All ${params.feedIds.length} feeds are fresh (<3 hours old), skipping refresh`
+      All ${params.feedIds.length} feeds are fresh (<3 hours old), skipping refresh`,
     );
   }
 
@@ -132,7 +132,7 @@ export async function prepareFeedsAndArticles(params: PrepareFeedsParams) {
     params.feedIds,
     params.startDate,
     params.endDate,
-    ARTICLE_LIMIT
+    ARTICLE_LIMIT,
   );
 
   // Ensure we have articles to work with'

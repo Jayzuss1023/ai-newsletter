@@ -3,7 +3,8 @@
 import { useAuth } from "@clerk/nextjs";
 import { Plus, RefreshCw } from "lucide-react";
 import { useRouter } from "next/navigation";
-import * as React from "react";
+import type * as React from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { validateAndAddFeed } from "@/actions/rss-fetch";
 import { upsertUserFromClerk } from "@/actions/user";
@@ -19,7 +20,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useState } from "react";
 
 interface AddFeedDialogProps {
   currentFeedCount: number;
@@ -54,7 +54,7 @@ export function AddFeedDialog({
         toast.error(
           isPro
             ? "Feed limit reached"
-            : "Starter plan limited to to 3 feeds. Upgrade to Prop for unlimited feeds."
+            : "Starter plan limited to to 3 feeds. Upgrade to Prop for unlimited feeds.",
         );
         return;
       }
@@ -70,7 +70,7 @@ export function AddFeedDialog({
         toast.warning(`Feed added but: ${result.error}`);
       } else {
         toast.success(
-          `Feed added successfuly! ${result.articlesCreated} articles imported`
+          `Feed added successfuly! ${result.articlesCreated} articles imported`,
         );
       }
 
@@ -80,7 +80,7 @@ export function AddFeedDialog({
     } catch (error) {
       console.error("Failed to add feed:", error);
       toast.error(
-        error instanceof Error ? error.message : "Failed to add RSS feed"
+        error instanceof Error ? error.message : "Failed to add RSS feed",
       );
     } finally {
       setIsAdding(false);

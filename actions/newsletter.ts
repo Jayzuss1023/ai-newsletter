@@ -62,7 +62,7 @@ export async function getNewslettersByUserId(
   options?: {
     limit?: number;
     skip?: number;
-  }
+  },
 ) {
   return wrapDatabaseOperation(async () => {
     return await prisma.newsletter.findMany({

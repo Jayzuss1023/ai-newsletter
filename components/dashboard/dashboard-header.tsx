@@ -67,7 +67,7 @@ export function DashboardHeader() {
                       className={cn(
                         "gap-2 transition-all",
                         isActive &&
-                          "bg-linear-to-r from-cyan-500 to-teal-600 text-white font-medium hover:from-cyan-600 hover:to-teal-700"
+                          "bg-linear-to-r from-cyan-500 to-teal-600 text-white font-medium hover:from-cyan-600 hover:to-teal-700",
                       )}
                     >
                       <Icon className="w-4 h-4" />
@@ -110,7 +110,7 @@ export function DashboardHeader() {
                   className={cn(
                     "gap-2 transition-all",
                     isActive &&
-                      "bg-linear-to-r from-cyan-500 to-teal-600 text-white font-medium hover:from-cyan-600 hover:to-teal-700"
+                      "bg-linear-to-r from-cyan-500 to-teal-600 text-white font-medium hover:from-cyan-600 hover:to-teal-700",
                   )}
                 >
                   <Icon className="w-4 h-4" />

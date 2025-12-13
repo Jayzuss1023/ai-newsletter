@@ -3,6 +3,7 @@
 import { useAuth } from "@clerk/nextjs";
 import { Check, Copy, Download, Save } from "lucide-react";
 import * as React from "react";
+import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -15,8 +16,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { useState, useEffect } from "react";
-import { NewsletterObject } from "@/lib/newsletter/types";
+import type { NewsletterObject } from "@/lib/newsletter/types";
 
 interface NewsletterDisplayProps {
   newsletter: Partial<NewsletterObject>;
@@ -68,7 +68,7 @@ export function NewsletterDisplay({
       "",
       formatSection(
         "SUBJECT LINE OPTIONS",
-        newsletter.suggestedSubjectLines ?? []
+        newsletter.suggestedSubjectLines ?? [],
       ),
       "",
       "NEWSLETTER.BODY:",

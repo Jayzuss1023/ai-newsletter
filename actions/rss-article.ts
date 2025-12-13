@@ -69,7 +69,7 @@ export async function createRssArticle(data: ArticleCreateData) {
  * Bulk creates multiple RSS articles, automatically skipping duplicates based on guid
  */
 export async function bulkCreateRssArticles(
-  articles: ArticleCreateData[]
+  articles: ArticleCreateData[],
 ): Promise<BulkOperationResult> {
   const results: BulkOperationResult = {
     created: 0,
@@ -102,7 +102,7 @@ export async function getArticlesByFeedsAndDateRange(
   feedIds: string[],
   startDate: Date,
   endDate: Date,
-  limit: 100
+  limit: 100,
 ) {
   return wrapDatabaseOperation(async () => {
     const articles = await prisma.rssArticle.findMany({

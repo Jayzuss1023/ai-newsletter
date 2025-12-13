@@ -3,7 +3,8 @@
 import { formatDistanceToNow } from "date-fns";
 import { Calendar, ChevronRight, FileText, Trash2 } from "lucide-react";
 import Link from "next/link";
-import * as React from "react";
+import type * as React from "react";
+import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { deleteNewsletterAction } from "@/actions/delete-newsletter";
 import { Badge } from "@/components/ui/badge";
@@ -15,7 +16,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useTransition, useState } from "react";
 
 interface Newsletter {
   id: string;
@@ -43,7 +43,7 @@ export function NewsletterHistoryList({ newsletters }: NewsletterHistoryProps) {
   const handleDelete = (
     e: React.MouseEvent,
     newsletterId: string,
-    newsletterTitle: string
+    newsletterTitle: string,
   ) => {
     e.preventDefault();
     e.stopPropagation();
@@ -141,7 +141,7 @@ export function NewsletterHistoryList({ newsletters }: NewsletterHistoryProps) {
                         {
                           month: "short",
                           day: "numeric",
-                        }
+                        },
                       )}{" "}
                       -{" "}
                       {new Date(newsletter.endDate).toLocaleDateString(
@@ -149,7 +149,7 @@ export function NewsletterHistoryList({ newsletters }: NewsletterHistoryProps) {
                         {
                           month: "short",
                           day: "numeric",
-                        }
+                        },
                       )}
                     </Badge>
                   </div>
