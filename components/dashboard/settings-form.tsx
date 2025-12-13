@@ -114,18 +114,18 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
   };
 
   return (
-    <div>
+    <div className="max-w-4xl">
       {/* Basic Information */}
-      <form onSubmit={handleSubmit(handleSave)}>
-        <Card>
+      <form className="space-y-6" onSubmit={handleSubmit(handleSave)}>
+        <Card className="transition-all hover:shadow-lg">
           <CardHeader>
-            <CardTitle>Basic Information</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-xl">Basic Information</CardTitle>
+            <CardDescription className="text-base">
               Core details about your newsletter that will be used in every
               generation
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="description">Newsletter Name</Label>
               <Input
@@ -165,14 +165,14 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
         </Card>
 
         {/* Brand Identity */}
-        <Card>
+        <Card className="transition-all hover:shadow-lg">
           <CardHeader>
-            <CardTitle>Brand Identity</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-xl">Brand Identity</CardTitle>
+            <CardDescription className="text-base">
               Your brand's voice and company information
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="companyName">Company Name</Label>
               <Input
@@ -204,10 +204,10 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
         </Card>
 
         {/* Additional Details */}
-        <Card>
+        <Card className="transition-all hover:shadow-lg">
           <CardHeader>
-            <CardTitle>Additional Details</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-xl">Additional Details</CardTitle>
+            <CardDescription className="text-base">
               Extra information to ewnhance your newsletters
             </CardDescription>
           </CardHeader>
@@ -232,9 +232,9 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
                 </Button>
               </div>
               {formTag.defaultTags && formTag.defaultTags.length > 0 && (
-                <div>
+                <div className="flex flex-wrap gap-2 mt-2">
                   {formTag.defaultTags.map((tag) => (
-                    <Badge key={tag}>
+                    <Badge key={tag} variant="secondary" className="gap-1">
                       {tag}
                       <Button
                         onClick={() => handleRemoveTag(tag)}
@@ -256,7 +256,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
                 {...register("disclaimerText")}
                 rows={3}
               />
-              <p className="text-cs text-muted-foreground">
+              <p className="text-xs text-muted-foreground">
                 This will be included near the end of every newsletter body
                 before the footer
               </p>
@@ -278,7 +278,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
         </Card>
 
         {/* Sender Information */}
-        <Card>
+        <Card className="transition-all hover:shadow-lg">
           <CardHeader>
             <CardTitle className="text-xl">Sender Information</CardTitle>
             <CardDescription className="text-base">
@@ -308,15 +308,16 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
         </Card>
 
         {/* Save Button */}
-        <div>
+        <div className="flex justify-end">
           <Button
             onSubmit={handleSubmit(handleSave)}
             disabled={isSaving}
             size="lg"
+            className="bg-linear-to-r from-cyan-500 to-teal-600 hover:from-cyan-600 hover:to-teal-700 text-white"
           >
             {isSaving ? (
               <>
-                <Loader2 />
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                 Saving...
               </>
             ) : (

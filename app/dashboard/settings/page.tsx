@@ -38,8 +38,8 @@ export default async function SettingsPage() {
   const settings = isPro ? await getCurrentUserSettings() : null;
 
   return (
-    <div>
-      <div>
+    <div className="min-h-screen bg-linear-to-b from-white to-gray-50 dark:from-black dark:to-gray-950">
+      <div className="container mx-auto py-12 px-6 lg:px-8 space-y-12">
         {/* Header */}
         <PageHeader
           icon={SettingsIcon}
@@ -49,23 +49,27 @@ export default async function SettingsPage() {
 
         {/* Free User Upfgrade Prompt */}
         {!isPro && (
-          <Card>
+          <Card className="border-2 border-blue-600 dark:border-blue-500 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 transition-all hover:shadow-lg">
             <CardHeader>
-              <div>
-                <div>
-                  <Crown />
+              <div className="flex items-center gap-3">
+                <div className="inline-flex size-12 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-purple-600 text-white">
+                  <Crown className="h-6 w-6" />
                 </div>
                 <div>
-                  <CardTitle>Upgrade to Pro</CardTitle>
-                  <CardDescription>
+                  <CardTitle className="text-3xl bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                    Upgrade to Pro
+                  </CardTitle>
+                  <CardDescription className="text-base mt-1">
                     Customize your newsletter with persistent settings
                   </CardDescription>
                 </div>
               </div>
             </CardHeader>
-            <CardContent>
-              <div>
-                <p>Pro users can save default newsletter settings including:</p>
+            <CardContent className="flex flex-col lg:flex-row gap-8 items-start">
+              <div className="space-y-4 flex-1">
+                <p className="text-base font-semibold text-gray-900 dark:text-white">
+                  Pro users can save default newsletter settings including:
+                </p>
                 <ul className="space-y-3">
                   <li className="flex items-start gap-3">
                     <div className="inline-flex size-6 items-center justify-center rounded-md bg-linear-to-br from-cyan-500 to-teal-600 text-white shrink-0 mt-0.5">
