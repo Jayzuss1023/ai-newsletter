@@ -14,7 +14,7 @@ import { prisma } from "@/lib/prisma";
 export interface UserSettingsInput {
   // Basic settings
   newsletterName?: string | null;
-  descripion?: string | null;
+  description?: string | null;
   targetAudience?: string | null;
   defaultTone?: string | null;
 
@@ -34,7 +34,7 @@ export interface UserSettingsInput {
 /**
  * Fetches user settings for the authenticated user
  */
-export async function getCurrentUser() {
+export async function getCurrentUserSettings() {
   try {
     const { userId } = await auth();
     if (!userId) {
@@ -109,7 +109,7 @@ export async function upsertUserSettings(data: UserSettingsInput) {
         },
         data: {
           newsletterName: data.newsletterName,
-          description: data.descripion,
+          description: data.description,
           targetAudience: data.targetAudience,
           defaultTone: data.defaultTone,
           brandVoice: data.brandVoice,
@@ -128,7 +128,7 @@ export async function upsertUserSettings(data: UserSettingsInput) {
         data: {
           userId: user.id,
           newsletterName: data.newsletterName,
-          description: data.descripion,
+          description: data.description,
           targetAudience: data.targetAudience,
           defaultTone: data.defaultTone,
           brandVoice: data.brandVoice,
