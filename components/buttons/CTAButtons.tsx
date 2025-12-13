@@ -6,6 +6,7 @@ import { Button } from "../ui/button";
 
 async function CTAButtons() {
   const { has, userId } = await auth();
+  console.log(userId);
   const hasPaidPlan =
     (await has({ plan: "pro" })) || (await has({ plan: "starter" }));
   return (
