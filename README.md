@@ -3,11 +3,11 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 ## Launched App
   • https://ai-newsletter-one.vercel.app/
   
-|  Tech Used              |  Reason       |
+|  Tech Used              |  Focus       |
 | -----------------------:|---------------|
-|  Prisma - MongoDB       |               |
-|  RSS Parser             |               |
-|  Clerk Authentication   |               |
-|  AI SDK - OpenAI        |               |
+|  Prisma - MongoDB       | Database used store feeds and user information           |
+|  RSS Parser             | Extract XML feeds and format in a way to upload it into the DB and feed it to the AI              |
+|  Clerk Authentication   | Convenient and easy set up for registering and logging in users              |
+|  AI SDK - OpenAI        | Feeding the XML feed to AI to retrieve newsletter title, content, announcement recommendations              |
 |  React                  |               |
   
