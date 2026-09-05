@@ -15,9 +15,9 @@ Connect your feeds, pick a date range, and get titles, subject lines, body conte
 - **Auth & billing** — Clerk handles sign-in, protected dashboard routes, and subscription plans
 
 ## Nores
--Articles are deduplicated by RSS guid so the same item isn’t stored repeatedly across feeds.
--Generation can take a while on larger date ranges. The stream route allows a longer Vercel function duration for that.
--Starter vs Pro limits (feed count, history) are enforced via Clerk plan checks in the app.
+- Articles are deduplicated by RSS guid so the same item isn’t stored repeatedly across feeds.
+- Generation can take a while on larger date ranges. The stream route allows a longer Vercel function duration for that.
+- Starter vs Pro limits (feed count, history) are enforced via Clerk plan checks in the app.
 
 
 ## How it works
