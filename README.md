@@ -14,7 +14,7 @@ Connect your feeds, pick a date range, and get titles, subject lines, body conte
 - **Copy-ready output** — formatted content meant for email platforms, not a custom editor
 - **Auth & billing** — Clerk handles sign-in, protected dashboard routes, and subscription plans
 
-## Nores
+## Notes
 - Articles are deduplicated by RSS guid so the same item isn’t stored repeatedly across feeds.
 - Generation can take a while on larger date ranges. The stream route allows a longer Vercel function duration for that.
 - Starter vs Pro limits (feed count, history) are enforced via Clerk plan checks in the app.
