@@ -2,6 +2,7 @@
 
 import { wrapDatabaseOperation } from "@/lib/database/error-handler";
 import { clientPromise } from "@/lib/prisma";
+import { Newsletter } from "@prisma/client";
 import { ObjectId } from "mongodb";
 
 // ============================================
@@ -17,6 +18,41 @@ import { ObjectId } from "mongodb";
  * @param data - Complete newsletter data and metadata
  * @returns Created newsletter record
  */
+
+type NewsletterDocument = {
+  _id: ObjectId;
+  userId: ObjectId;
+  suggestedTitles: string[];
+  suggestedSubjectLines: string[];
+  body: string;
+  topAnnouncements: string[];
+  additionalInfo?: string | null;
+  startDate: Date;
+  endDate: Date;
+  userInput?: string | null;
+  feedsUsed: ObjectId[];
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+// Reconstruct the MongoDB(NewsletterDocument) format to match the Type Newsletter
+function toNewsletter(doc: NewsletterDocument) {
+  return {
+    id: doc._id.toString(),
+    userId: doc.userId.toString(),
+    suggestedTitles: doc.suggestedTitles,
+    suggestedSubjectLines: doc.suggestedSubjectLines,
+    body: doc.body,
+    topAnnouncements: doc.topAnnouncements,
+    additionalInfo: doc.additionalInfo ?? null,
+    startDate: doc.startDate,
+    endDate: doc.endDate,
+    userInput: doc.userInput ?? null,
+    feedsUsed: doc.feedsUsed.map((id) => id.toString()),
+    createdAt: doc.createdAt,
+    updatedAt: doc.updatedAt,
+  };
+}
 
 export async function createNewsletter(data: {
   userId: string;
@@ -113,19 +149,19 @@ export async function getNewsletterById(id: string, userId: string) {
   return wrapDatabaseOperation(async () => {
     const client = await clientPromise;
     const db = client.db("newsletter");
-    const newsletter = await db.collection("Newsletter").findOne({
-      _id: new ObjectId(id),
-    });
+    const newsletter = await db
+      .collection<NewsletterDocument>("Newsletter")
+      .findOne({
+        _id: new ObjectId(id),
+      });
 
-    if (!newsletter) {
-      return null;
-    }
+    if (!newsletter) return null;
 
     if (newsletter.userId.toString() !== userId) {
       throw new Error("Unauthorized: Newsletter does not belong to user");
     }
 
-    return { ...newsletter, id: newsletter._id.toString() };
+    return toNewsletter(newsletter);
   }, "fetch newsletter by ID");
 }
 
