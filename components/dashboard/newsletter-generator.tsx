@@ -11,7 +11,14 @@ import { NewsletterForm } from "./newsletter-form";
 
 export async function NewsletterGenerator() {
   const { userId } = await auth();
-  const user = await upsertUserFromClerk(userId!);
+  if (!userId) {
+    throw new Error("no user found");
+  }
+
+  const user = await upsertUserFromClerk(userId);
+  if (!user) {
+    throw new Error("no user found");
+  }
   const feeds = await getRssFeedsByUserId(user.id);
 
   if (feeds.length === 0) {
@@ -31,7 +38,7 @@ export async function NewsletterGenerator() {
     <NewsletterForm
       feeds={feeds.map((f) => ({
         id: f.id,
-        title: f.title,
+        title: f.title ?? null,
         url: f.url,
       }))}
     />

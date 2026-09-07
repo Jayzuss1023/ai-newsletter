@@ -60,10 +60,13 @@ export function AddFeedDialog({
       }
 
       if (!userId) {
-        throw new Error("Not authenticated");
+        throw new Error("no user found");
       }
 
       const user = await upsertUserFromClerk(userId);
+      if (!user) {
+        throw new Error("no user found");
+      }
       const result = await validateAndAddFeed(user.id, newFeedUrl.trim());
 
       if (result.error) {

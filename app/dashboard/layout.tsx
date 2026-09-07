@@ -7,7 +7,10 @@ async function Layout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const { has } = await auth();
+  const { userId, has } = await auth();
+  if (!userId || !has) {
+    throw new Error("no user found");
+  }
   const hasPaidPlan =
     (await has({ plan: "pro" })) || (await has({ plan: "starter" }));
 

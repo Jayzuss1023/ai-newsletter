@@ -55,7 +55,7 @@ export async function upsertUserFromClerk(clerkUserId: string) {
 
       const updated = await db.collection("User").findOne({ clerkUserId });
       if (!updated) {
-        return null;
+        throw new Error("no user found");
       }
       return { ...updated, id: updated._id.toString() };
     }
@@ -72,7 +72,7 @@ export async function upsertUserFromClerk(clerkUserId: string) {
       .findOne({ _id: result.insertedId });
 
     if (!created) {
-      return null;
+      throw new Error("no user found");
     }
 
     return { ...created, id: created._id.toString() };

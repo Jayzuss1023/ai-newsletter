@@ -34,7 +34,7 @@ export default async function HistoryPage() {
   const isPro = await has({ plan: "pro" });
   const user = await upsertUserFromClerk(userId);
   if (!user) {
-    throw new Error("No user exists");
+    throw new Error("no user found");
   }
   const newsletters = isPro ? await getNewslettersByUserId(user.id) : [];
 

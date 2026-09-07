@@ -4,19 +4,36 @@ import { wrapDatabaseOperation } from "@/lib/database/error-handler";
 import { clientPromise } from "@/lib/prisma";
 import { ObjectId, type UpdateFilter, type Document } from "mongodb";
 
-// ============================================
-// RSS FEED ACTIONS
-// ============================================
+type RssFeedDocument = {
+  _id: ObjectId;
+  userId: ObjectId;
+  url: string;
+  title?: string | null;
+  description?: string | null;
+  link?: string | null;
+  imageUrl?: string | null;
+  language?: string | null;
+  lastFetched?: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type RssFeedWithCount = RssFeedDocument & {
+  id: string;
+  _count: { articles: number };
+};
 
 /**
  * Fetches all RSS feeds for a specific user with article counts
  */
-export async function getRssFeedsByUserId(userId: string) {
+export async function getRssFeedsByUserId(
+  userId: string,
+): Promise<RssFeedWithCount[]> {
   return wrapDatabaseOperation(async () => {
     const client = await clientPromise;
     const db = client.db("newsletter");
     const feeds = await db
-      .collection("RssFeed")
+      .collection<RssFeedDocument>("RssFeed")
       .find({
         userId: new ObjectId(userId),
       })
@@ -24,7 +41,7 @@ export async function getRssFeedsByUserId(userId: string) {
       .toArray();
 
     return Promise.all(
-      feeds.map(async (feed) => {
+      feeds.map(async (feed): Promise<RssFeedWithCount> => {
         const articles = await db.collection("RssArticle").countDocuments({
           $or: [
             { feedId: feed._id },

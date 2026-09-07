@@ -17,13 +17,13 @@ export async function getCurrentUser() {
   const { userId } = await auth();
 
   if (!userId) {
-    throw new Error("User not found in database");
+    throw new Error("no user found");
   }
 
   const user = await getUserByClerkId(userId);
 
   if (!user) {
-    throw new Error("User not found in database");
+    throw new Error("no user found");
   }
 
   return user;

@@ -59,7 +59,9 @@ export default async function NewsletterDetailPage({ params }: PageProps) {
   }
 
   const user = await upsertUserFromClerk(userId);
-  if (!user) return;
+  if (!user) {
+    throw new Error("no user found");
+  }
 
   const newsletter = await getNewsletterById(id, user.id);
 
