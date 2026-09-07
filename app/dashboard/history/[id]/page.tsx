@@ -22,7 +22,7 @@ export default async function NewsletterDetailPage({ params }: PageProps) {
 
   if (!userId) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 dark:from-black dark:to-gray-950">
+      <div className="min-h-screen bg-linear-to-b from-white to-gray-50 dark:from-black dark:to-gray-950">
         <div className="container mx-auto py-12 px-6 lg:px-8">
           <Card className="transition-all hover:shadow-lg">
             <CardHeader>
@@ -43,7 +43,7 @@ export default async function NewsletterDetailPage({ params }: PageProps) {
 
   if (!isPro) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 dark:from-black dark:to-gray-950">
+      <div className="min-h-screen bg-linear-to-b from-white to-gray-50 dark:from-black dark:to-gray-950">
         <div className="container mx-auto py-12 px-6 lg:px-8">
           <Card className="transition-all hover:shadow-lg">
             <CardHeader>
@@ -59,6 +59,8 @@ export default async function NewsletterDetailPage({ params }: PageProps) {
   }
 
   const user = await upsertUserFromClerk(userId);
+  if (!user) return;
+
   const newsletter = await getNewsletterById(id, user.id);
 
   if (!newsletter) {
