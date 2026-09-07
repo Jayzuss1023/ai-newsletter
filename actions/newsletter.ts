@@ -1,7 +1,8 @@
 "use server";
 
 import { wrapDatabaseOperation } from "@/lib/database/error-handler";
-import { prisma } from "@/lib/prisma";
+import clientPromise from "@/lib/prisma";
+import { ObjectId } from "mongodb";
 
 // ============================================
 // NEWSLETTER ACTIONS
@@ -30,19 +31,33 @@ export async function createNewsletter(data: {
   feedsUsed: string[];
 }) {
   return wrapDatabaseOperation(async () => {
-    return await prisma.newsletter.create({
-      data: {
-        userId: data.userId,
-        suggestedTitles: data.suggestedTitles,
-        body: data.body,
-        topAnnouncements: data.topAnnouncements,
-        additionalInfo: data.additionalInfo,
-        startDate: data.startDate,
-        endDate: data.endDate,
-        userInput: data.userInput,
-        feedsUsed: data.feedsUsed,
-      },
+    const client = await clientPromise;
+    const db = client.db("newsletter");
+    const now = new Date();
+    const result = await db.collection("Newsletter").insertOne({
+      userId: new ObjectId(data.userId),
+      suggestedTitles: data.suggestedTitles,
+      suggestedSubjectLines: data.suggestedSubjectLines,
+      body: data.body,
+      topAnnouncements: data.topAnnouncements,
+      additionalInfo: data.additionalInfo,
+      startDate: data.startDate,
+      endDate: data.endDate,
+      userInput: data.userInput,
+      feedsUsed: data.feedsUsed.map((id) => new ObjectId(id)),
+      createdAt: now,
+      updatedAt: now,
     });
+
+    const newsletter = await db
+      .collection("Newsletter")
+      .findOne({ _id: result.insertedId });
+
+    if (!newsletter) {
+      return null;
+    }
+
+    return { ...newsletter, id: newsletter._id.toString() };
   }, "create newsletter");
 }
 
@@ -65,16 +80,22 @@ export async function getNewslettersByUserId(
   },
 ) {
   return wrapDatabaseOperation(async () => {
-    return await prisma.newsletter.findMany({
-      where: {
-        userId,
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-      take: options?.limit,
-      skip: options?.skip,
-    });
+    const client = await clientPromise;
+    const db = client.db("newsletter");
+    const newsletters = await db
+      .collection("Newsletter")
+      .find({
+        userId: new ObjectId(userId),
+      })
+      .sort({ createdAt: -1 })
+      .skip(options?.skip ?? 0)
+      .limit(options?.limit ?? 0)
+      .toArray();
+
+    return newsletters.map((newsletter) => ({
+      ...newsletter,
+      id: newsletter._id.toString(),
+    }));
   }, "fetch newsletters by user");
 }
 
@@ -90,21 +111,21 @@ export async function getNewslettersByUserId(
  */
 export async function getNewsletterById(id: string, userId: string) {
   return wrapDatabaseOperation(async () => {
-    const newsletter = await prisma.newsletter.findUnique({
-      where: { id },
+    const client = await clientPromise;
+    const db = client.db("newsletter");
+    const newsletter = await db.collection("Newsletter").findOne({
+      _id: new ObjectId(id),
     });
 
-    // Newsletter not found
     if (!newsletter) {
       return null;
     }
 
-    // Authorization: ensure newsletter belongs to user
-    if (newsletter.userId !== userId) {
+    if (newsletter.userId.toString() !== userId) {
       throw new Error("Unauthorized: Newsletter does not belong to user");
     }
 
-    return newsletter;
+    return { ...newsletter, id: newsletter._id.toString() };
   }, "fetch newsletter by ID");
 }
 
@@ -118,10 +139,10 @@ export async function getNewsletterById(id: string, userId: string) {
  */
 export async function getNewslettersCountByUserId(userId: string) {
   return wrapDatabaseOperation(async () => {
-    return await prisma.newsletter.count({
-      where: {
-        userId,
-      },
+    const client = await clientPromise;
+    const db = client.db("newsletter");
+    return await db.collection("Newsletter").countDocuments({
+      userId: new ObjectId(userId),
     });
   }, "count newsletters by user");
 }
@@ -138,26 +159,24 @@ export async function getNewslettersCountByUserId(userId: string) {
  */
 export async function deleteNewsletter(id: string, userId: string) {
   return wrapDatabaseOperation(async () => {
-    // Verify the newsletter exists and belongs to the user
-    const newsletter = await prisma.newsletter.findUnique({
-      where: {
-        id,
-      },
+    const client = await clientPromise;
+    const db = client.db("newsletter");
+    const newsletter = await db.collection("Newsletter").findOne({
+      _id: new ObjectId(id),
     });
 
     if (!newsletter) {
       throw new Error("Newsletter not found");
     }
 
-    if (newsletter.userId !== userId) {
+    if (newsletter.userId.toString() !== userId) {
       throw new Error("Unauthorized: Newletter does not belong to user");
     }
 
-    // Delete the newsletter
-    return await prisma.newsletter.delete({
-      where: {
-        id,
-      },
+    await db.collection("Newsletter").deleteOne({
+      _id: new ObjectId(id),
     });
+
+    return { ...newsletter, id: newsletter._id.toString() };
   }, "delete newsletter");
 }

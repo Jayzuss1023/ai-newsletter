@@ -3,12 +3,10 @@ import {
   isPrismaError,
   wrapDatabaseOperation,
 } from "@/lib/database/error-handler";
-import {
-  ARTICLE_ORDER_BY_DATE_DESC,
-  ARTICLE_WITH_FEED_INCLUDE,
-} from "@/lib/database/prisma-helpers";
-import { prisma } from "@/lib/prisma";
+import clientPromise from "@/lib/prisma";
 import type { ArticleCreateData, BulkOperationResult } from "@/lib/rss/types";
+import { ObjectId } from "mongodb";
+
 
 // ============================================
 // RSS ARTICLE ACTIONS
@@ -22,48 +20,50 @@ import type { ArticleCreateData, BulkOperationResult } from "@/lib/rss/types";
 export async function createRssArticle(data: ArticleCreateData) {
   return wrapDatabaseOperation(async () => {
     // First, try to find existing article
-    const existing = await prisma.rssArticle.findUnique({
-      where: { guid: data.guid },
-      select: { id: true, sourceFeedIds: true },
-    });
+    const client = await clientPromise;
+    const db = client.db("newsletter");
+    const existing = await db
+      .collection("RssArticle")
+      .findOne(
+        { guid: data.guid },
+        { projection: { _id: 1, sourceFeedIds: 1 } },
+      );
 
     if (existing) {
-      // Article exists - only update if feedId not already in sourceFeedIds
-      if (!existing.sourceFeedIds.includes(data.feedId)) {
-        return await prisma.rssArticle.update({
-          where: { guid: data.guid },
-          data: {
-            sourceFeedIds: {
-              push: data.feedId,
-            },
+      // Article exists — $addToSet skips the feedId if it is already present
+      await db.collection("RssArticle").updateOne(
+        { _id: existing._id },
+        {
+          $addToSet: {
+            sourceFeedIds: new ObjectId(data.feedId),
           },
-        });
-      }
+        },
+      );
 
-      //   Return existing article if feedId already present
-      return await prisma.rssArticle.findUnique({
-        where: { guid: data.guid },
-      });
+      return await db.collection("RssArticle").findOne({ guid: data.guid });
     }
 
     // Article doesn't exist - create new
-    return await prisma.rssArticle.create({
-      data: {
-        feedId: data.feedId,
-        guid: data.guid,
-        sourceFeedIds: [data.feedId],
-        title: data.title,
-        link: data.link,
-        content: data.content,
-        summary: data.summary,
-        pubDate: data.pubDate,
-        author: data.author,
-        categories: data.categories || [],
-        imageUrl: data.imageUrl,
-      },
+    const now = new Date();
+    const feedObjectId = new ObjectId(data.feedId);
+    return await db.collection("RssArticle").insertOne({
+      feedId: feedObjectId,
+      guid: data.guid,
+      sourceFeedIds: [feedObjectId],
+      title: data.title,
+      link: data.link,
+      content: data.content,
+      summary: data.summary,
+      pubDate: data.pubDate,
+      author: data.author,
+      categories: data.categories || [],
+      imageUrl: data.imageUrl,
+      createdAt: now,
+      updatedAt: now,
     });
   }, "create RSS article");
-}
+} 
+
 
 /**
  * Bulk creates multiple RSS articles, automatically skipping duplicates based on guid
@@ -82,7 +82,13 @@ export async function bulkCreateRssArticles(
       await createRssArticle(article);
       results.created++;
     } catch (error) {
-      if (isPrismaError(error) && error.code === "P2002") {
+      if (
+        (isPrismaError(error) && error.code === "P2002") ||
+        (typeof error === "object" &&
+          error !== null &&
+          "code" in error &&
+          error.code === 11000)
+      ) {
         results.skipped++;
       } else {
         results.errors++;
@@ -105,30 +111,41 @@ export async function getArticlesByFeedsAndDateRange(
   limit: 100,
 ) {
   return wrapDatabaseOperation(async () => {
-    const articles = await prisma.rssArticle.findMany({
-      where: {
-        OR: [
-          { feedId: { in: feedIds } },
+    const client = await clientPromise;
+    const db = client.db("newsletter");
+    const feedObjectIds = feedIds.map((id) => new ObjectId(id));
+    const articles = await db
+      .collection("RssArticle")
+      .find({
+        $or: [
+          { feedId: { $in: [...feedIds, ...feedObjectIds] } },
           {
             sourceFeedIds: {
-              hasSome: feedIds,
+              $in: [...feedIds, ...feedObjectIds],
             },
           },
         ],
         pubDate: {
-          gte: startDate,
-          lte: endDate,
+          $gte: startDate,
+          $lte: endDate,
         },
-      },
-      include: ARTICLE_WITH_FEED_INCLUDE,
-      orderBy: ARTICLE_ORDER_BY_DATE_DESC,
-      take: limit,
-    });
+      })
+      .sort({ pubDate: -1 })
+      .limit(limit)
+      .toArray();
 
     // Add sourceCount for reference
     return articles.map((article: (typeof articles)[number]) => ({
       ...article,
-      sourceCount: article.sourceFeedIds.length,
+      title: String(article.title ?? ""),
+      link: String(article.link ?? ""),
+      pubDate: article.pubDate as Date,
+      summary: (article.summary as string | undefined) ?? null,
+      content: (article.content as string | undefined) ?? null,
+      feed: { title: null as string | null },
+      sourceCount: Array.isArray(article.sourceFeedIds)
+        ? article.sourceFeedIds.length
+        : 0,
     }));
   }, "fetch articles by feeds and date range");
 }

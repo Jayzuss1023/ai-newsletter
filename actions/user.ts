@@ -1,7 +1,7 @@
 "use server";
 
 import { wrapDatabaseOperation } from "@/lib/database/error-handler";
-import { prisma } from "@/lib/prisma";
+import clientPromise from "@/lib/prisma";
 
 // ============================================
 // USER ACTIONS
@@ -15,9 +15,15 @@ import { prisma } from "@/lib/prisma";
  */
 export async function getUserByClerkId(clerkUserId: string) {
   return wrapDatabaseOperation(async () => {
-    return await prisma.user.findUnique({
-      where: { clerkUserId },
-    });
+    const client = await clientPromise;
+    const db = client.db("newsletter");
+    const user = await db.collection("User").findOne({ clerkUserId });
+
+    if (!user) {
+      return null;
+    }
+
+    return { ...user, id: user._id.toString() };
   }, "fetch user by Clerk ID");
 }
 
@@ -25,7 +31,7 @@ export async function getUserByClerkId(clerkUserId: string) {
  * Creates a user if they don't exist, or returns the existing user
  * Updates the timestamp when user already exists (tracks last activity)
  *
- * Note: Uses findUnique + create pattern instead of upsert to avoid transactions
+ * Note: Uses findOne + insertOne pattern instead of upsert to avoid transactions
  * (MongoDB Atlas free tier M0 doesn't support transactions)
  *
  * @param clerkUserId - The Clerk authentication ID
@@ -33,26 +39,42 @@ export async function getUserByClerkId(clerkUserId: string) {
  */
 export async function upsertUserFromClerk(clerkUserId: string) {
   return wrapDatabaseOperation(async () => {
-    // Try to find existing user
-    const existingUser = await prisma.user.findUnique({
-      where: { clerkUserId },
-    });
+    const client = await clientPromise;
+    const db = client.db("newsletter");
+    const existingUser = await db.collection("User").findOne({ clerkUserId });
 
     if (existingUser) {
-      // Update timestamp for existing user
-      return await prisma.user.update({
-        where: { clerkUserId },
-        data: {
-          updatedAt: new Date(),
+      await db.collection("User").updateOne(
+        { clerkUserId },
+        {
+          $set: {
+            updatedAt: new Date(),
+          },
         },
-      });
+      );
+
+      const updated = await db.collection("User").findOne({ clerkUserId });
+      if (!updated) {
+        return null;
+      }
+      return { ...updated, id: updated._id.toString() };
     }
 
-    // Create new user if doesn't exist
-    return await prisma.user.create({
-      data: {
-        clerkUserId,
-      },
+    const now = new Date();
+    const result = await db.collection("User").insertOne({
+      clerkUserId,
+      createdAt: now,
+      updatedAt: now,
     });
+
+    const created = await db
+      .collection("User")
+      .findOne({ _id: result.insertedId });
+
+    if (!created) {
+      return null;
+    }
+
+    return { ...created, id: created._id.toString() };
   }, "upsert user");
 }

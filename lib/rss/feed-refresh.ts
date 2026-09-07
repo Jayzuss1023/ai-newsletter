@@ -1,9 +1,9 @@
 // biome-ignore assist/source/organizeImports: // biome-ignore lint: false positive
 import { getArticlesByFeedsAndDateRange } from "@/actions/rss-article";
 import { fetchAndStoreFeed } from "@/actions/rss-fetch";
-import { prisma } from "@/lib/prisma";
+import clientPromise from "@/lib/prisma";
 import type { PrepareFeedsParams } from "./types";
-import { fail } from "node:assert";
+import { ObjectId } from "mongodb";
 
 // ============================================
 // FEED REFRESH UTILITIES
@@ -38,36 +38,54 @@ export const ARTICLE_LIMIT = 100;
  * - Keeps data reasonably fresh for everyone
  */
 export async function getFeedsToRefresh(feedIds: string[]): Promise<string[]> {
+  const client = await clientPromise;
+  const db = client.db("newsletter");
   const now = new Date();
   const cacheThreshold = new Date(now.getTime() - CACHE_WINDOW);
+  const mongoFeeds = feedIds.map((id) => new ObjectId(id));
 
   // Get all requested feeds with their URLS
-  const feeds = await prisma.rssFeed.findMany({
-    where: {
-      id: { in: feedIds },
-    },
-    select: {
-      id: true,
-      url: true,
-    },
-  });
+  const feeds = await db
+    .collection("RssFeed")
+    .find(
+      { _id: { $in: mongoFeeds } },
+      {
+        projection: {
+          id: true,
+          url: true,
+        },
+      },
+    )
+    .toArray();
 
   // Get the most recent fetch time for each unique URL
   // This is done in a single query using aggregation
   const urlsToCheck = [...new Set(feeds.map((f) => f.url))];
 
-  const recentFetches = await prisma.rssFeed.groupBy({
-    by: ["url"],
-    where: {
-      url: { in: urlsToCheck },
-      lastFetched: {
-        gte: cacheThreshold,
+  const recentFetches = await db
+    .collection("RssFeed")
+    .aggregate([
+      {
+        $match: {
+          url: { $in: urlsToCheck },
+          lastFetched: { $gte: cacheThreshold },
+        },
       },
-    },
-    _max: {
-      lastFetched: true,
-    },
-  });
+      {
+        $group: {
+          _id: "$url",
+          lastFetched: { $max: cacheThreshold },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          url: "$_id",
+          lastFetched: true,
+        },
+      },
+    ])
+    .toArray();
 
   // Build a set of URLS that were recently fetched (don't need refresh)
   const recentlyFetchedUrls = new Set(

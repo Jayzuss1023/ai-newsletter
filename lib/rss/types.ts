@@ -1,3 +1,5 @@
+import { ObjectId } from "mongodb";
+
 // ============================================
 // RSS-SPECIFIC TYPE DEFINITIONS
 // ============================================
@@ -6,7 +8,7 @@
  * Data required to create an RSS article.
  */
 export interface ArticleCreateData {
-  feedId: string;
+  feedId: ObjectId;
   guid: string;
   title: string;
   link: string;

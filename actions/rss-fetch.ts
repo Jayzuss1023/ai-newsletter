@@ -1,14 +1,14 @@
 "use server";
 
 import { wrapDatabaseOperation } from "@/lib/database/error-handler";
-import { prisma } from "@/lib/prisma";
+import clientPromise from "@/lib/prisma";
 import {
   type ArticleData,
   fetchAndParseFeed,
   validateFeedUrl,
 } from "@/lib/rss/parser";
 import { bulkCreateRssArticles } from "./rss-article";
-import { updateFeedLastFetched } from "./rss-feed";
+import { ObjectId } from "mongodb";
 
 // ============================================
 // RSS FETCH ACTIONS
@@ -18,6 +18,9 @@ import { updateFeedLastFetched } from "./rss-feed";
  * Validates an RSS URL and creates a new feed with initial article fetch
  */
 export async function validateAndAddFeed(userId: string, url: string) {
+  const client = await clientPromise;
+  const db = client.db("newsletter");
+
   return wrapDatabaseOperation(async () => {
     // Validate the RSS feed URL
     const isValid = await validateFeedUrl(url);
@@ -26,28 +29,33 @@ export async function validateAndAddFeed(userId: string, url: string) {
     }
 
     // Create the feed in database
-    const feed = await prisma.rssFeed.create({
-      data: {
-        userId,
-        url,
-      },
+    const now = new Date();
+    const feed = await db.collection("RssFeed").insertOne({
+      userId: new ObjectId(userId),
+      url,
+      createdAt: now,
+      updatedAt: now,
     });
+
+    const feedId = feed.insertedId.toString();
 
     // Fetch and store intial articles
     try {
-      const result = await fetchAndStoreFeed(feed.id);
+      const result = await fetchAndStoreFeed(feedId);
 
       // Update feed with metadata from RSS
-      await prisma.rssFeed.update({
-        where: { id: feed.id },
-        data: {
-          title: result.metadata.title,
-          description: result.metadata.description,
-          link: result.metadata.link,
-          imageUrl: result.metadata.imageUrl,
-          language: result.metadata.language,
+      await db.collection("RssFeed").updateOne(
+        { _id: new ObjectId(feedId) },
+        {
+          $set: {
+            title: result.metadata.title,
+            description: result.metadata.description,
+            link: result.metadata.link,
+            imageUrl: result.metadata.imageUrl,
+            language: result.metadata.language,
+          },
         },
-      });
+      );
 
       return {
         feed,
@@ -72,10 +80,12 @@ export async function validateAndAddFeed(userId: string, url: string) {
  */
 
 export async function fetchAndStoreFeed(feedId: string) {
+  const client = await clientPromise;
+  const db = client.db("newsletter");
   return wrapDatabaseOperation(async () => {
     // Get the feed details
-    const feed = await prisma.rssFeed.findUnique({
-      where: { id: feedId },
+    const feed = await db.collection("RssFeed").findOne({
+      _id: new ObjectId(feedId),
     });
 
     if (!feed) {
@@ -87,7 +97,7 @@ export async function fetchAndStoreFeed(feedId: string) {
 
     // Conert ArticleData to format expected by bulkCreateRssArticles
     const articlesToCreate = articles.map((article: ArticleData) => ({
-      feedId: feed.id,
+      feedId: feed._id,
       guid: article.guid,
       title: article.title,
       link: article.link,
