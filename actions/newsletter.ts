@@ -36,7 +36,7 @@ type NewsletterDocument = {
 };
 
 // Reconstruct the MongoDB(NewsletterDocument) format to match the Type Newsletter
-function toNewsletter(doc: NewsletterDocument) {
+function toNewsletter(doc: NewsletterDocument): Newsletter {
   return {
     id: doc._id.toString(),
     userId: doc.userId.toString(),
@@ -119,7 +119,7 @@ export async function getNewslettersByUserId(
     const client = await clientPromise;
     const db = client.db("newsletter");
     const newsletters = await db
-      .collection("Newsletter")
+      .collection<NewsletterDocument>("Newsletter")
       .find({
         userId: new ObjectId(userId),
       })
@@ -128,10 +128,7 @@ export async function getNewslettersByUserId(
       .limit(options?.limit ?? 0)
       .toArray();
 
-    return newsletters.map((newsletter) => ({
-      ...newsletter,
-      id: newsletter._id.toString(),
-    }));
+    return newsletters.map(toNewsletter);
   }, "fetch newsletters by user");
 }
 
