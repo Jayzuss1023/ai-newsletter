@@ -90,4 +90,5 @@ if (process.env.NODE_ENV === "development") {
   clientPromise = connectClient();
 }
 
+export { clientPromise, clientPromise as prisma };
 export default clientPromise;

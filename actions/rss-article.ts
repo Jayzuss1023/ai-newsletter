@@ -3,7 +3,7 @@ import {
   isPrismaError,
   wrapDatabaseOperation,
 } from "@/lib/database/error-handler";
-import clientPromise from "@/lib/prisma";
+import { clientPromise } from "@/lib/prisma";
 import type { ArticleCreateData, BulkOperationResult } from "@/lib/rss/types";
 import { ObjectId } from "mongodb";
 

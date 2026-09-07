@@ -1,7 +1,7 @@
 // biome-ignore assist/source/organizeImports: // biome-ignore lint: false positive
 import { getArticlesByFeedsAndDateRange } from "@/actions/rss-article";
 import { fetchAndStoreFeed } from "@/actions/rss-fetch";
-import clientPromise from "@/lib/prisma";
+import { clientPromise } from "@/lib/prisma";
 import type { PrepareFeedsParams } from "./types";
 import { ObjectId } from "mongodb";
 

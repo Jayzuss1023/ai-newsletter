@@ -1,7 +1,7 @@
 "use server";
 
 import { wrapDatabaseOperation } from "@/lib/database/error-handler";
-import clientPromise from "@/lib/prisma";
+import { clientPromise } from "@/lib/prisma";
 import { ObjectId, type UpdateFilter, type Document } from "mongodb";
 
 // ============================================

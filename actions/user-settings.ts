@@ -1,7 +1,7 @@
 "use server";
 
 import { auth } from "@clerk/nextjs/server";
-import clientPromise from "@/lib/prisma";
+import { clientPromise } from "@/lib/prisma";
 import { ObjectId, WithId, Document } from "mongodb";
 import type { UserSettings } from "@prisma/client";
 
